@@ -18,7 +18,7 @@ jobs:
       - name: Instill dependencies and build
         run: npm install
 
-      - run: npm build
+      - run: npm run build
 
   deploy:
     runs-on: ubuntu-latest
