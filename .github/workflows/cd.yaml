@@ -20,10 +20,6 @@ jobs:
 
       - run: npm run build
 
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Sign in to AWS with Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -33,5 +29,3 @@ jobs:
 
       - name: Deploy to S3 Bucket
         run: aws s3 sync dist/ s3://lumenwalk-website --delete
-
-    needs: [build]
