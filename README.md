@@ -19,3 +19,15 @@ A GitHub Actions CD pipeline that automatically updates an S3 bucket with CloudF
 - How file structure affects where commands look for files
 
 ## Evidence
+
+### Pipeline Passing
+
+![image](./screenshots/Screenshot_20260409_174247.png)
+
+### Upload to S3 Bucket
+
+![image](./screenshots/Screenshot_20260409_174314.png)
+
+### Static Site Hosted on Subdomain
+
+![image](./screenshots/Screenshot_20260409_174649.png)
