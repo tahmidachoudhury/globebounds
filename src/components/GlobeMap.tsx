@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import type { Country } from "@/data/countries";
 import { findCountryAtPoint } from "@/data/countries";
@@ -11,9 +11,13 @@ interface GlobeMapProps {
   flyToBounds: Country | null;
 }
 
+const LIGHT_PRESETS = ["dusk", "dawn", "night", "light"] as const;
+type LightPreset = (typeof LIGHT_PRESETS)[number];
+
 export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds }: GlobeMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const [lightPreset, setLightPreset] = useState<LightPreset>("dusk");
 
   const updateBoundsLayer = useCallback((map: mapboxgl.Map, country: Country | null) => {
     const sourceId = "bbox-source";
@@ -59,7 +63,17 @@ export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/tahmid01/cmnrcnvbe000f01qw2iib70pv",
+      //-------------------------------------------------------------
+      //MINIMAL BLACK
+      // style: "mapbox://styles/tahmid01/cmnrp0k9f001f01s65qc2134c",
+      //-------------------------------------------------------------
+      //DEFAULT
+      style: "mapbox://styles/tahmid01/cmnrpanxm001l01qn9e2hcjwm",
+      config: {
+        basemap: {
+          lightPreset,
+        },
+      },
       center: [0, 20],
       zoom: 1.5,
       projection: "globe" as any,
@@ -134,5 +148,38 @@ export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds
     map.fitBounds([west, south, east, north], { padding: 80, duration: 1500 });
   }, [flyToBounds]);
 
-  return <div ref={containerRef} className="absolute inset-0" />;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!map.isStyleLoaded()) return;
+
+    map.setConfigProperty("basemap", "lightPreset", lightPreset);
+  }, [lightPreset]);
+
+  return (
+    <div className="absolute inset-0">
+      <div ref={containerRef} className="absolute inset-0" />
+
+      <div className="absolute left-4 top-16 z-10 rounded-md border border-white/15 bg-black/40 p-1 backdrop-blur">
+        <div className="flex items-center gap-1">
+          {LIGHT_PRESETS.map((preset) => {
+            const isActive = preset === lightPreset;
+            return (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setLightPreset(preset)}
+                className={`rounded px-3 py-1 text-xs font-medium capitalize transition-colors ${isActive
+                  ? "bg-sky-500 text-white"
+                  : "bg-transparent text-slate-200 hover:bg-white/10"
+                  }`}
+              >
+                {preset}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
