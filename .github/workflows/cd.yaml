@@ -1,0 +1,37 @@
+name: Deploy to S3
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Instill dependencies and build
+        run: npm install
+
+      - run: npm build
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sign in to AWS with Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Deploy to S3 Bucket
+        run: aws s3 sync dist/ s3://lumenwalk-website --delete
+
+    needs: [build]
