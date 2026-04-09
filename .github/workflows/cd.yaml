@@ -28,4 +28,4 @@ jobs:
           aws-region: eu-west-2
 
       - name: Deploy to S3 Bucket
-        run: aws s3 sync dist/ s3://lumenwalk-website --delete
+        run: aws s3 sync dist/ s3://globebounds-website --delete
