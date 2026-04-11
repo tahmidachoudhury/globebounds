@@ -38,8 +38,8 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
               onClick={() => { onSelect(c); setQuery(""); setOpen(false); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
             >
-              <span className="text-xs text-muted-foreground">{c.iso3}</span>
-              <span>{c.name}</span>
+              <span className="text-xs text-muted-foreground text-left">{c.iso3}</span>
+              <span className="text-left">{c.name}</span>
             </button>
           ))}
         </div>
