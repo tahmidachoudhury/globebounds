@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "generate:countries": "node scripts/generate-country-meta.mjs",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import type { Country } from "@/data/countries";
 import { findCountryAtPoint } from "@/data/countries";
+import { boundsFromFeatureCollection, loadCountryFeatureCollection } from "@/data/countryGeo";
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoidGFobWlkMDEiLCJhIjoiY21laDJkMnJjMDM0bjJrcDZucm1ubDZ5cCJ9.p85LMck0PSQRKa_obWk68w";
 
@@ -14,47 +15,14 @@ interface GlobeMapProps {
 const LIGHT_PRESETS = ["dusk", "dawn", "night", "light"] as const;
 type LightPreset = (typeof LIGHT_PRESETS)[number];
 
+const emptyFc: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+
 export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds }: GlobeMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const geoCacheRef = useRef(new Map<string, GeoJSON.FeatureCollection>());
   const [lightPreset, setLightPreset] = useState<LightPreset>("dusk");
-
-  const updateBoundsLayer = useCallback((map: mapboxgl.Map, country: Country | null) => {
-    const sourceId = "bbox-source";
-    const source = map.getSource(sourceId) as mapboxgl.GeoJSONSource | undefined;
-
-    if (!country) {
-      if (source) {
-        source.setData({ type: "FeatureCollection", features: [] });
-      }
-      return;
-    }
-
-    const { west, south, east, north } = country.bounds;
-    const geojson: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: { name: country.name },
-          geometry: {
-            type: "Polygon",
-            coordinates: [[
-              [west, south],
-              [east, south],
-              [east, north],
-              [west, north],
-              [west, south],
-            ]],
-          },
-        },
-      ],
-    };
-
-    if (source) {
-      source.setData(geojson);
-    }
-  }, []);
+  const [styleReady, setStyleReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -113,9 +81,10 @@ export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds
         paint: {
           "line-color": "#0ea5e9",
           "line-width": 2,
-          "line-dasharray": [3, 2],
         },
       });
+
+      setStyleReady(true);
     });
 
     map.on("click", (e) => {
@@ -128,24 +97,69 @@ export default function GlobeMap({ selectedCountry, onSelectCountry, flyToBounds
     mapRef.current = map;
 
     return () => {
+      setStyleReady(false);
       map.remove();
       mapRef.current = null;
     };
   }, []);
 
-  // Update bbox when selection changes
+  // Load GeoJSON outline when selection changes
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
-    updateBoundsLayer(map, selectedCountry);
-  }, [selectedCountry, updateBoundsLayer]);
+    if (!map || !styleReady || !map.isStyleLoaded()) return;
 
-  // Fly to bounds
+    const source = map.getSource("bbox-source") as mapboxgl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    if (!selectedCountry) {
+      source.setData(emptyFc);
+      return;
+    }
+
+    const { iso3 } = selectedCountry;
+    let cancelled = false;
+
+    (async () => {
+      let fc = geoCacheRef.current.get(iso3);
+      if (!fc) {
+        fc = await loadCountryFeatureCollection(iso3);
+        if (fc) geoCacheRef.current.set(iso3, fc);
+      }
+      if (cancelled || mapRef.current !== map) return;
+      source.setData(fc ?? emptyFc);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCountry, styleReady]);
+
+  // Fit map to country geometry (fallback to bounds if GeoJSON missing)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !flyToBounds) return;
-    const { west, south, east, north } = flyToBounds.bounds;
-    map.fitBounds([west, south, east, north], { padding: 80, duration: 1500 });
+
+    const { iso3, bounds: b } = flyToBounds;
+    let cancelled = false;
+
+    (async () => {
+      let fc = geoCacheRef.current.get(iso3);
+      if (!fc) {
+        fc = await loadCountryFeatureCollection(iso3);
+        if (fc) geoCacheRef.current.set(iso3, fc);
+      }
+      if (cancelled || mapRef.current !== map) return;
+
+      if (fc) {
+        map.fitBounds(boundsFromFeatureCollection(fc), { padding: 80, duration: 1500 });
+      } else {
+        map.fitBounds([b.west, b.south, b.east, b.north], { padding: 80, duration: 1500 });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [flyToBounds]);
 
   useEffect(() => {

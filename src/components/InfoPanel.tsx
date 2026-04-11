@@ -12,7 +12,7 @@ export default function InfoPanel({ country, onZoom, onClear }: InfoPanelProps) 
   return (
     <div className="absolute bottom-6 left-6 z-20 w-80 rounded-2xl border border-border bg-card/60 p-5 shadow-2xl backdrop-blur-xl">
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">{country.iso}</span>
+        <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">{country.iso3}</span>
       </div>
       <h2 className="mb-4 text-xl font-semibold text-foreground">{country.name}</h2>
 

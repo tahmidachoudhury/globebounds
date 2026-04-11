@@ -31,7 +31,7 @@ export default function Index() {
             Globe<span className="text-primary">Bounds</span>
           </h1>
           <span className="hidden sm:block text-xs text-muted-foreground">
-            Click a country to inspect its bounds
+            Click a country to see its outline
           </span>
         </div>
         <SearchBar onSelect={handleSelect} />
@@ -52,7 +52,7 @@ export default function Index() {
       {/* Legend */}
       <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2 rounded-xl border border-border bg-card/80 px-3 py-2 backdrop-blur-xl">
         <span className="inline-block h-3 w-5 rounded-sm border border-primary/60 bg-primary/20" />
-        <span className="text-xs text-muted-foreground">Bounding box</span>
+        <span className="text-xs text-muted-foreground">Country outline</span>
       </div>
     </div>
   );

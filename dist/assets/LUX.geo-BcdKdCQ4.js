@@ -1,0 +1,1 @@
+const e="FeatureCollection",t=[{type:"Feature",id:"LUX",properties:{name:"Luxembourg"},geometry:{type:"Polygon",coordinates:[[[6.043073,50.128052],[6.242751,49.902226],[6.18632,49.463803],[5.897759,49.442667],[5.674052,49.529484],[5.782417,50.090328],[6.043073,50.128052]]]}}],o={type:e,features:t};export{o as default,t as features,e as type};

@@ -13,7 +13,9 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return countries.filter(c => c.name.toLowerCase().includes(q) || c.iso.toLowerCase().includes(q)).slice(0, 6);
+    return countries
+      .filter((c) => c.name.toLowerCase().includes(q) || c.iso3.toLowerCase().includes(q))
+      .slice(0, 12);
   }, [query]);
 
   return (
@@ -32,11 +34,11 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
         <div className="absolute top-full left-0 mt-1 w-full rounded-xl border border-border bg-card/95 py-1 shadow-xl backdrop-blur-xl">
           {results.map((c) => (
             <button
-              key={c.iso}
+              key={c.iso3}
               onClick={() => { onSelect(c); setQuery(""); setOpen(false); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
             >
-              <span className="text-xs text-muted-foreground">{c.iso}</span>
+              <span className="text-xs text-muted-foreground">{c.iso3}</span>
               <span>{c.name}</span>
             </button>
           ))}
