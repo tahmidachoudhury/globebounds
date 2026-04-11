@@ -27,5 +27,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-2
 
-      - name: Deploy to S3 Bucket
-        run: aws s3 sync dist/ s3://globebounds-website --delete
+      - name: Deploy to S3 Bucket and Invalidate CloudFront Cache
+        run: |
+          aws s3 sync dist/ s3://globebounds-website --delete 
+          aws cloudfront create-invalidation --distribution-id E1060V6DNCGSKG --paths "/*"
