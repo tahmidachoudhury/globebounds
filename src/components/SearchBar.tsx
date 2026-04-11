@@ -39,7 +39,7 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
             >
               <span className="text-xs text-muted-foreground text-left">{c.iso3}</span>
-              <span className="text-left">{c.name}</span>
+              <span className="block text-left">{c.name}</span>
             </button>
           ))}
         </div>
