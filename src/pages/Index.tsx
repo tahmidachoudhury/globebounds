@@ -31,7 +31,7 @@ export default function Index() {
             Globe<span className="text-primary">Bounds</span>
           </h1>
           <span className="hidden sm:block text-xs text-muted-foreground">
-            Click a country to see its outline
+            Click a country to see its outline DEPLOY TEST 11.03.26
           </span>
         </div>
         <SearchBar onSelect={handleSelect} />
